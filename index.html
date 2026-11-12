@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Синхрон • Обща дъска и чат</title>
+<meta name="description" content="Учебен HTML5 проект за рисуване и общуване между няколко устройства с PeerJS.">
+<style>
+:root{--ink:#17342c;--muted:#62766d;--green:#236b50;--paper:#f6f7f2;--line:#dce4db}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,sans-serif}header,main,footer{max-width:1280px;margin:auto;padding:22px 30px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.logo{font-size:24px;font-weight:800;letter-spacing:-1px}.logo span{color:var(--green);margin-right:9px}.tag,.eyebrow{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}h1{font-size:clamp(32px,4vw,52px);line-height:1.12;letter-spacing:-2px;margin:12px 0}h2{font-size:18px;margin:0 0 14px}p{margin:8px 0;color:var(--muted)}.intro{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:14px 0 26px}.intro p{max-width:580px}.badge{border:1px solid var(--line);padding:10px 16px;border-radius:99px;white-space:nowrap;font-size:13px;background:white}.badge b{color:var(--green)}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:22px}.setup{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}label{font-size:13px;font-weight:650;display:block;margin-bottom:6px}input,button{font:inherit}input[type=text]{width:100%;border:1px solid #bdcfc3;border-radius:9px;padding:11px 13px;background:#fff;color:var(--ink)}input:focus,button:focus-visible{outline:3px solid #94cfb8;outline-offset:2px}button{border:0;border-radius:9px;padding:11px 17px;background:var(--green);color:white;font-weight:650;cursor:pointer}button:hover{filter:brightness(.94)}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#edf2ec;color:var(--ink)}.row{display:flex;align-items:center;gap:10px}.row input{min-width:0}.small{font-size:13px}.setup button{white-space:nowrap}.status{background:#eaf1e7;border-radius:10px;padding:12px 16px;margin:0 0 20px;font-size:14px}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:20px}.board{padding:0;overflow:hidden}.toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)}.toolbar label{margin:0}.toolbar input[type=color]{width:34px;height:34px;padding:1px;border:0;background:none;cursor:pointer}.toolbar select{font:inherit;padding:6px;border:1px solid var(--line);border-radius:7px}.toolbar button{font-size:13px;padding:8px 12px}canvas{display:block;width:100%;aspect-ratio:4/3;background-color:white;background-image:radial-gradient(#dce6de 1px,transparent 1px);background-size:22px 22px;touch-action:none;cursor:crosshair}.board-bottom{padding:10px 18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.side{display:flex;flex-direction:column;gap:18px}.people{list-style:none;padding:0;margin:0}.people li{padding:8px 0;border-bottom:1px solid #f0f3ed;font-size:14px}.people li:before{content:'●';font-size:10px;color:#42966a;margin-right:10px}.chat{display:flex;flex-direction:column;flex:1;min-height:320px}.messages{height:240px;overflow:auto;flex:1;margin-bottom:12px}.message{margin:0 0 14px;overflow-wrap:anywhere}.message strong{display:block;font-size:12px;color:var(--green)}.message span{font-size:14px}.chat .row{align-items:stretch}.chat button{padding:8px 12px}.chat input{font-size:14px}.room{margin-bottom:20px}.room code{font-size:16px;overflow-wrap:anywhere}.room .row{flex-wrap:wrap;justify-content:space-between}.room p{margin:0 0 8px}footer{font-size:12px;color:var(--muted)}details{margin-top:22px}summary{cursor:pointer;font-weight:600}.help{max-width:850px;font-size:14px}[hidden]{display:none!important}@media(max-width:850px){.workspace{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1.5fr}.intro{display:block}.badge{display:inline-block;margin-top:16px}.setup{grid-template-columns:1fr}.messages{height:200px}}@media(max-width:520px){header,main,footer{padding:18px 16px}.tag{font-size:9px;letter-spacing:.5px}.side{display:flex}.setup .row{flex-wrap:wrap}.setup button{width:100%}.toolbar{padding:12px}.card{padding:17px}.board{padding:0}.intro{margin-top:8px}.room .row{align-items:flex-start}h1{letter-spacing:-1px}}
+</style>
+</head>
+<body>
+<header><div class="logo"><span>◒</span>Синхрон</div><div class="tag">HTML5 + PeerJS · учебен проект</div></header>
+<main>
+<section class="intro"><div><div class="eyebrow">Идеите са по-добри заедно</div><h1>Различни екрани.<br>Една обща дъска.</h1><p>Рисувайте, обсъждайте и създавайте заедно в реално време. От телефон, таблет или компютър.</p></div><div class="badge"><b id="count">0</b> устройства в стаята</div></section>
+<section class="setup" id="setup">
+<div class="card"><h2>01 / Създай стая</h2><label for="name">Твоето име (за двата варианта)</label><div class="row"><input id="name" type="text" maxlength="24" placeholder="Например: Калоян" autocomplete="nickname"><button id="create">Нова стая</button></div><p class="small">Отвори стая и покани поне още две устройства.</p></div>
+<div class="card"><h2>02 / Присъедини се</h2><label for="roomInput">Код на стаята</label><div class="row"><input id="roomInput" type="text" maxlength="80" placeholder="Постави кода от домакина" autocomplete="off"><button id="join" class="secondary">Влез</button></div><p class="small">Или отвори линка, изпратен от домакина.</p></div>
+</section>
+<div class="status" id="status" role="status" aria-live="polite">Създай стая или въведи код, за да започнеш.</div>
+<section id="room" class="card room" hidden><div class="row"><div><p class="small">Код на стаята · <span id="role"></span></p><code id="roomCode"></code></div><div class="row"><button id="copy" class="secondary">Копирай покана</button><button id="leave" class="secondary">Напусни</button></div></div><input id="invite" type="text" readonly aria-label="Линк за покана" hidden></section>
+<div class="workspace">
+<section class="card board"><div class="toolbar"><div class="row"><label for="color">Цвят</label><input id="color" type="color" value="#236b50"><label for="width">Линия</label><select id="width"><option value="3">Тънка</option><option value="7" selected>Средна</option><option value="14">Дебела</option></select></div><div class="row"><button id="save" class="secondary">Свали PNG</button><button id="clear" class="secondary" disabled>Изчисти</button></div></div><canvas id="canvas" width="1200" height="900" aria-label="Обща дъска за рисуване с мишка или докосване"></canvas><div class="board-bottom">Рисувай с мишка или пръст. Изчистването е достъпно само за домакина.</div></section>
+<aside class="side"><section class="card"><h2>В стаята</h2><ul id="people" class="people"><li>Все още няма участници</li></ul></section><section class="card chat"><h2>Разговор</h2><div id="messages" class="messages" role="log" aria-live="polite"><p class="small">Тук ще се появят съобщенията.</p></div><form id="chatForm" class="row"><input id="message" type="text" maxlength="500" placeholder="Твоето съобщение…" aria-label="Съобщение" disabled><button id="send" type="submit" disabled aria-label="Изпрати">➜</button></form></section></aside>
+</div>
+<details><summary>Как работи връзката?</summary><div class="help"><p>Домакинът създава стая с уникален код. Останалите устройства се свързват с него чрез PeerJS и WebRTC. Той получава всяка линия и съобщение и ги препраща към всички участници. Нов участник получава и текущата рисунка.</p><p>Страницата на домакина трябва да остане отворена. Данните се пазят само в паметта на текущата стая; няма база данни. Всеки с поканата може да влезе. Използвайте интернет и дръжте страниците активни. При мрежа, блокираща WebRTC, опитайте друга Wi-Fi мрежа.</p></div></details>
+</main><footer>Синхрон / Минипроект „Комуникация между устройства“ · HTML, CSS и JavaScript</footer>
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script>
+'use strict';
+// 1. Интерфейс и състояние. Домакинът пази единната версия на стаята.
+const $ = id => document.getElementById(id);
+const canvas = $('canvas'), ctx = canvas.getContext('2d');
+let peer = null, host = false, ready = false, roomId = '', myName = '';
+let upstream = null, connections = new Map(), members = [], strokes = [], messages = [];
+let previous = null, pointer = null, timeout = null, generation = 0;
+const MAX_SEGMENTS = 15000;
+const nameOf = value => typeof value === 'string' ? value.trim().slice(0,24) || 'Гост' : 'Гост';
+function status(text) { $('status').textContent = text; }
+function controls() {
+  $('setup').hidden = !!peer; $('room').hidden = !roomId;
+  $('message').disabled = $('send').disabled = !ready;
+  $('clear').disabled = !ready || !host;
+}
+function renderPeople() {
+  $('count').textContent = String(members.length); $('people').replaceChildren();
+  for (const m of members) { const li = document.createElement('li'); li.textContent = m.name + (m.host ? ' · домакин' : ''); $('people').append(li); }
+}
+function renderChat() {
+  $('messages').replaceChildren();
+  for (const m of messages) { const div = document.createElement('div'); div.className = 'message'; const who = document.createElement('strong'); who.textContent = m.name; const body = document.createElement('span'); body.textContent = m.text; div.append(who,body); $('messages').append(div); }
+  $('messages').scrollTop = $('messages').scrollHeight;
+}
+function segment(s) {
+  ctx.beginPath(); ctx.moveTo(s.x1*1200,s.y1*900); ctx.lineTo(s.x2*1200,s.y2*900);
+  ctx.strokeStyle=s.color; ctx.lineWidth=s.width; ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+}
+function redraw() { ctx.clearRect(0,0,1200,900); strokes.forEach(segment); }
+function validSegment(s) {
+  return s && ['x1','x2','y1','y2'].every(k=>Number.isFinite(s[k]) && s[k]>=0 && s[k]<=1) && /^#[0-9a-f]{6}$/i.test(s.color) && [3,7,14].includes(s.width);
+}
+function safeSend(c,data) { if(c && c.open) { try { c.send(data); } catch { status('Проблем при изпращане. Провери връзката и влез отново.'); } } }
+function broadcast(data) { connections.forEach(c=>safeSend(c,data)); }
+function roster() {
+  members=[{id:peer.id,name:myName,host:true},...Array.from(connections.values()).filter(c=>c.open && c.userName).map(c=>({id:c.peer,name:c.userName,host:false}))];
+  renderPeople(); broadcast({type:'members',members});
+}
+// 2. Приемане на подредени събития от домакина.
+function apply(data) {
+  if(!data || typeof data !== 'object') return;
+  if(data.type==='segment' && validSegment(data.segment)) { strokes.push(data.segment); segment(data.segment); }
+  if(data.type==='chat' && data.message && typeof data.message.text==='string') { messages.push({name:nameOf(data.message.name),text:data.message.text.slice(0,500)}); messages=messages.slice(-100); renderChat(); }
+  if(data.type==='clear') { strokes=[]; redraw(); }
+  if(data.type==='members' && Array.isArray(data.members)) { members=data.members;renderPeople(); }
+  if(data.type==='snapshot' && Array.isArray(data.strokes) && Array.isArray(data.messages)) {
+    strokes=data.strokes.filter(validSegment).slice(0,MAX_SEGMENTS); messages=data.messages.slice(-100); redraw();renderChat();
+    ready=true; clearTimeout(timeout); controls();status('Свързан си. Рисунките и чатът се споделят с всички в стаята.');
+  }
+  if(data.type==='notice') status(String(data.text).slice(0,200));
+}
+// 3. Домакинът проверява действията, показва ги и ги препраща.
+function accept(data, sender) {
+  if(!data || typeof data !== 'object') return;
+  let event;
+  if(data.type==='segment' && validSegment(data.segment)) {
+    if(strokes.length>=MAX_SEGMENTS) { const n={type:'notice',text:'Дъската е пълна. Свалете PNG; домакинът може да я изчисти.'}; apply(n); broadcast(n);return; }
+    const s=data.segment;event={type:'segment',segment:{x1:s.x1,y1:s.y1,x2:s.x2,y2:s.y2,color:s.color,width:s.width}};
+  } else if(data.type==='chat' && typeof data.text==='string' && data.text.trim()) event={type:'chat',message:{name:sender,text:data.text.trim().slice(0,500)}};
+  else if(data.type==='clear' && sender===null) event={type:'clear'};
+  if(event) { apply(event);broadcast(event); }
+}
+function submit(data) { if(!ready)return; if(host)accept(data,myName);else safeSend(upstream,data); }
+function reset(text='Напусна стаята. Можеш да създадеш нова или да влезеш отново.') {
+  generation++;clearTimeout(timeout); const old=peer; peer=null;ready=false;roomId='';host=false;upstream=null;
+  connections.clear();members=[];strokes=[];messages=[];previous=null;pointer=null;
+  if(old)old.destroy();redraw();renderPeople();renderChat();controls();status(text);
+}
+function showRoom(id) { roomId=id;$('roomCode').textContent=id;$('role').textContent=host?'ти си домакин':'участник';controls(); }
+function start(asHost) {
+  if(peer)return;
+  if(typeof Peer==='undefined') { status('PeerJS не се зареди. Провери интернет връзката и презареди страницата.');return; }
+  const target=$('roomInput').value.trim();
+  if(!asHost && !/^[a-zA-Z0-9_-]{1,80}$/.test(target)) {status('Постави валиден код на стаята от домакина.');return;}
+  host=asHost;myName=nameOf($('name').value); const ticket=++generation;
+  const p=peer=new Peer();controls();status('Установяване на връзка…');
+  timeout=setTimeout(()=>{if(ticket===generation)reset('Връзката не се установи. Провери кода, домакина и мрежата и опитай отново.');},20000);
+  p.on('open',id=>{
+    if(ticket!==generation)return;
+    if(host){clearTimeout(timeout);ready=true;showRoom(id);roster();status('Стаята е готова. Копирай поканата и я отвори на другите устройства.');}
+    else {showRoom(target);upstream=p.connect(target,{reliable:true,serialization:'json'});
+      upstream.on('open',()=>safeSend(upstream,{type:'hello',name:myName}));
+      upstream.on('data',data=>{if(ticket===generation)apply(data);});
+      upstream.on('close',()=>{if(ticket===generation)reset('Връзката с домакина е прекъсната. Влез отново или създай нова стая.');});
+      upstream.on('error',()=>{if(ticket===generation)reset('Неуспешна връзка с домакина. Провери кода и опитай друга мрежа.');});
+    }
+  });
+  p.on('connection',c=>{
+    if(!host){c.close();return;}
+    const greetTimer=setTimeout(()=>{if(!c.userName)c.close();},10000);
+    c.on('data',data=>{
+      if(ticket!==generation || !data)return;
+      if(data.type==='hello' && !c.userName){
+        clearTimeout(greetTimer);c.userName=nameOf(data.name);connections.set(c.peer,c);
+        safeSend(c,{type:'snapshot',strokes,messages});roster();
+      }else if(c.userName)accept(data,c.userName);
+    });
+    c.on('close',()=>{clearTimeout(greetTimer);if(ticket===generation){connections.delete(c.peer);roster();}});
+    c.on('error',()=>{c.close();});
+  });
+  p.on('error',error=>{if(ticket===generation)reset('Грешка във връзката ('+error.type+'). Провери интернет, кода и дали домакинът е онлайн.');});
+  p.on('disconnected',()=>{if(ticket===generation)status('Връзката със сигналния сървър е прекъсната. Съществуващите връзки може да работят; за нови участници влез отново.');});
+}
+// 4. Координатите са между 0 и 1: еднаква рисунка на всички екрани.
+function point(e) { const r=canvas.getBoundingClientRect();return {x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))}; }
+function line(a,b){submit({type:'segment',segment:{x1:a.x,y1:a.y,x2:b.x,y2:b.y,color:$('color').value,width:Number($('width').value)}});}
+canvas.addEventListener('pointerdown',e=>{if(!ready || pointer!==null)return; e.preventDefault();pointer=e.pointerId;canvas.setPointerCapture(pointer);previous=point(e);line(previous,{x:Math.min(1,previous.x+.0001),y:previous.y});});
+canvas.addEventListener('pointermove',e=>{if(e.pointerId!==pointer || !previous)return;const next=point(e);line(previous,next);previous=next;});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,e=>{if(e.pointerId===pointer){previous=null;pointer=null;}});
+$('create').onclick=()=>start(true);$('join').onclick=()=>start(false);
+$('leave').onclick=()=>{if(!host || confirm('Това ще прекъсне стаята за всички участници. Напускане?'))reset();};
+$('clear').onclick=()=>{if(host && ready && confirm('Да изчистя ли дъската за всички?'))accept({type:'clear'},null);};
+$('chatForm').onsubmit=e=>{e.preventDefault();if(ready && $('message').value.trim()){submit({type:'chat',text:$('message').value});$('message').value='';}};
+$('copy').onclick=async()=>{const url=new URL(location.href);url.hash='room='+encodeURIComponent(roomId);try{await navigator.clipboard.writeText(url.href);status('Поканата е копирана. Изпрати я на другите участници.');}catch{$('invite').hidden=false;$('invite').value=url.href;$('invite').select();status('Копирай показания линк ръчно.');}};
+$('save').onclick=()=>{const exportCanvas=document.createElement('canvas');exportCanvas.width=1200;exportCanvas.height=900;const exportCtx=exportCanvas.getContext('2d');exportCtx.fillStyle='white';exportCtx.fillRect(0,0,1200,900);exportCtx.drawImage(canvas,0,0);const a=document.createElement('a');a.download='sinhron.png';a.href=exportCanvas.toDataURL('image/png');a.click();};
+const invitation=new URLSearchParams(location.hash.slice(1)).get('room');if(invitation){$('roomInput').value=invitation.slice(0,80);status('Имаш покана за стая. Въведи име и натисни „Влез“.');}
+controls();
+</script>
+</body>
+</html>
